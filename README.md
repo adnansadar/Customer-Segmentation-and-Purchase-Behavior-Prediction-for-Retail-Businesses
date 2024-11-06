@@ -18,11 +18,12 @@
 ├── src/phase2/
 │   ├── 50592332_phase2.ipynb
 │   ├── rachana_purchase_prediction.ipynb
-│   ├── abdul_purchasing_trends.ipynb
+│   ├── 50604245_phase2.ipynb
 │   |── brunda_external_factors.ipynb
 ├── src/phase1.ipynb
 ├── pdf/
 │   ├── 50592332_phase2.pdf
+│   ├── 50604245_phase2.pdf
 └── README.md
 ```
 
@@ -45,9 +46,10 @@
 
 ### Mohammed Abdul Aftab Muddassir
 
-- **Question:** What are the trends in customer purchasing patterns over time?
-- **Code Location:** `src/abdul_purchasing_trends.ipynb`
-- **Analysis Location:** `src/abdul_purchasing_trends.ipynb`
+- **Question 1:** Which product categories are generating the highest sales, indicating a need for potential adjustments in stocking strategies?
+- **Question 2:** How do the revenue trends across different quarters in 2021 and 2022 compare, and how can quarterly performance of past years be helpful to plan for the future of business?
+- **Code Location:** `src/50604245_phase2.ipynb`
+- **Analysis Location:** `src/50604245_phase2.ipynb or 50604245_phase2.pdf`
 
 ### Brunda Venkatesh
 
