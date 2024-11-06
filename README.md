@@ -12,15 +12,17 @@
 ## Folder Structure
 
 ```
-├── dataset/
+├── datasets/
 │   ├── customer_shopping_data.csv
 │   └── df_encoded.csv
-│   ├── src/phase2/
-│   │   ├── 50592332_phase2.ipynb
-│   │   ├── rachana_purchase_prediction.ipynb
-│   │   ├── abdul_purchasing_trends.ipynb
-│   │   └── brunda_external_factors.ipynb
-│   ├── src/phase1.ipynb
+├── src/phase2/
+│   ├── 50592332_phase2.ipynb
+│   ├── rachana_purchase_prediction.ipynb
+│   ├── abdul_purchasing_trends.ipynb
+│   |── brunda_external_factors.ipynb
+├── src/phase1.ipynb
+├── pdf/
+│   ├── 50592332_phase2.pdf
 └── README.md
 ```
 
@@ -31,9 +33,9 @@
 - **Question 1:** How do age and gender affect customer preferences for different product categories?
 - **Question 2:** Do customers in different locations (shopping malls) show distinct purchasing behaviors?
 - **Code 1 Location:** `src/50592332_phase2.ipynb`
-- **Analysis 1 Location:** `src/50592332_phase2.ipynb`
+- **Analysis 1 Location:** `refer to src/50592332_phase2.ipynb or pdf/50592332_phase2.pdf`
 - **Code 2 Location:** `src/50592332_phase2.ipynb`
-- **Analysis 2 Location:** `src/50592332_phase2.ipynb`
+- **Analysis 2 Location:** `refer to src/50592332_phase2.ipynb or pdf/50592332_phase2.pdf`
 
 ### Rachana Ramesh
 
