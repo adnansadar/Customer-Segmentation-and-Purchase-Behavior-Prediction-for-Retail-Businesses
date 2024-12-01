@@ -14,13 +14,15 @@
 ```
 ├── datasets/
 │   ├── customer_shopping_data.csv
-│   └── df_encoded.csv
-├── src/phase2/
+│   ├── df_encoded.csv
+│   ├── customer_shopping_data_processed.csv
+│   └── processed_data.csv
+├── exp/
 │   ├── 50592332_phase2.ipynb
 │   ├── 50596083_phase2.ipynb
 │   ├── 50604245_phase2.ipynb
 │   |── 50610164_phase2.ipynb
-├── src/phase1.ipynb
+│   |── phase1.ipynb
 ├── pdf/
 │   ├── 50592332_phase2.pdf
 │   ├── 50604245_phase2.pdf
