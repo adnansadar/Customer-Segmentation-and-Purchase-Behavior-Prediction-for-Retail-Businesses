@@ -17,13 +17,15 @@
 │   └── df_encoded.csv
 ├── src/phase2/
 │   ├── 50592332_phase2.ipynb
-│   ├── rachana_purchase_prediction.ipynb
+│   ├── 50596083_phase2.ipynb
 │   ├── 50604245_phase2.ipynb
-│   |── brunda_external_factors.ipynb
+│   |── 50610164_phase2.ipynb
 ├── src/phase1.ipynb
 ├── pdf/
 │   ├── 50592332_phase2.pdf
 │   ├── 50604245_phase2.pdf
+│   ├── 50596083_phase2.pdf
+│   ├── 50610164_phase2.pdf
 └── README.md
 ```
 
