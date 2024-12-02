@@ -41,15 +41,15 @@ elif choice == "Add Entry":
         payment_method = st.text_input("Payment Method")
         invoice_date = st.date_input("Invoice Date")
         shopping_mall = st.text_input("Shopping Mall")
-        location = st.text_input("Location")
+        #location = st.text_input("Location")
         submitted = st.form_submit_button("Add Entry")
 
         if submitted:
             query = """
-                INSERT INTO customer_data (invoice_number, customer_id, gender, age, category, quantity, price, payment_method, invoice_date, shopping_mall, location)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO customer_data (invoice_number, customer_id, gender, age, category, quantity, price, payment_method, invoice_date, shopping_mall)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
-            values = (invoice_number, customer_id, gender, age, category, quantity, price, payment_method, invoice_date, shopping_mall, location)
+            values = (invoice_number, customer_id, gender, age, category, quantity, price, payment_method, invoice_date, shopping_mall)
             cursor.execute(query, values)
             conn.commit()
             st.success("New entry added successfully!")
@@ -66,8 +66,6 @@ elif choice == "Update Entry":
         cursor.execute(query, (customer_id,))
         result = cursor.fetchone()
         
-        # Debug: Show fetched data
-        st.write("Fetched Data:", result)
         
         if result:
             # Store fetched data in session state
@@ -83,21 +81,18 @@ elif choice == "Update Entry":
         with st.form("update_form"):
             age = st.number_input("Age", value=result["age"], min_value=1, max_value=120)
             category = st.text_input("Category", value=result["category"])
-            location = st.text_input("Location", value=result["location"])
+            #location = st.text_input("Location", value=result["location"])
             submitted = st.form_submit_button("Update Entry")
-            st.write(submitted)
 
         # Step 3: Handle Update Click
         if submitted:
-            st.write(submitted)
-            st.write(f"Updating customer: {customer_id} with Age: {age}, Category: {category}, Location: {location}")
             try:
                 update_query = """
                     UPDATE customer_data
-                    SET age = %s, category = %s, location = %s
+                    SET age = %s, category = %s
                     WHERE customer_id = %s
                 """
-                cursor.execute(update_query, (age, category, location, customer_id))
+                cursor.execute(update_query, (age, category, customer_id))
                 conn.commit()
                 st.success("Entry updated successfully!")
                 
