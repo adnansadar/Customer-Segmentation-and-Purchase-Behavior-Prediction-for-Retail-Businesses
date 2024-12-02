@@ -15,7 +15,7 @@ else:
 cursor = conn.cursor(dictionary=True)
 
 # Sidebar menu
-menu = ["View ", "Add Entry", "Update Entry", "Delete Entry", "Visualizations", "RFM Analysis", "Segmentation"]
+menu = ["View Data", "Add Entry", "Update Entry", "Delete Entry", "Visualizations", "RFM Analysis", "Segmentation"]
 choice = st.sidebar.selectbox("Menu", menu)
 
 # View Data
