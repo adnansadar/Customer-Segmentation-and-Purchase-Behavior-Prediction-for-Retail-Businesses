@@ -7,7 +7,8 @@ def connect_to_db():
        host=os.getenv("DB_HOST"),
         user=os.getenv("DB_USER"),
         password=os.getenv("DB_PASSWORD"),
-        database=os.getenv("DB_NAME")
+        database=os.getenv("DB_NAME"),
+        port=os.getenv("DB_PORT")
     )
     cursor = conn.cursor()
     cursor.execute("SET SQL_SAFE_UPDATES = 0;")  # Disabling safe update for this session
