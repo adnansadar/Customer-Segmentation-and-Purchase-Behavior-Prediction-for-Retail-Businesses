@@ -14,18 +14,247 @@ else:
     st.error("Database connection is not active")
 cursor = conn.cursor(dictionary=True)
 
-# Sidebar menu
-menu = ["View Data", "Add Entry", "Update Entry", "Delete Entry", "Visualizations", "RFM Analysis", "Segmentation"]
-choice = st.sidebar.selectbox("Menu", menu)
+# Sidebar Main Menu
+st.sidebar.title("Menu")
+main_menu = st.sidebar.selectbox(
+    "Main Menu",
+    ["View Data", "Customer Insights"]
+)
 
-# View Data
-if choice == "View Data":
-    st.subheader("View Customer Data")
-    query = "SELECT * FROM customer_data"
-    cursor.execute(query)
-    data = cursor.fetchall()
-    df = pd.DataFrame(data)
-    st.dataframe(df)
+# View Data Section
+if main_menu == "View Data":
+    menu = ["View Data", "Add Entry", "Update Entry", "Delete Entry", "Visualizations", "RFM Analysis", "Segmentation"]
+    choice = st.sidebar.selectbox("Menu", menu)
+
+    
+    # View Data
+    if choice == "View Data":
+        st.subheader("View Customer Data")
+        query = "SELECT * FROM customer_data"
+        cursor.execute(query)
+        data = cursor.fetchall()
+        df = pd.DataFrame(data)
+        st.dataframe(df)
+
+########################################################
+# Customer Insights Section
+if main_menu == "Customer Insights":
+    st.title("Customer Insights")
+    
+    # Sub-menu for Customer Insights
+    insight_menu = st.radio(
+        "Choose a section",
+        ["Top Customers", "RFM Segmentation", "Acquiring New Customers", "Product Recommendations", "Predicting Churn"]
+    )
+
+    # Top Customers Section
+    if insight_menu == "Top Customers":
+        st.header("Top Customers Contributing the Most Revenue")
+        # Add logic for Top Customers
+        # Input: Number of top customers
+        num_customers = st.slider("Select number of top customers", 5, 20, 10)
+        query =  """
+    WITH rfm_data AS (
+        SELECT
+            customer_id, 
+            gender, 
+            age, 
+          
+            DATEDIFF('2024-01-01', invoice_date) AS last_date_order,
+            SUM(quantity) AS total_orders,
+            CAST(SUM(price * quantity ) AS DECIMAL(10, 2)) AS revenue  
+        FROM 
+            customer_data
+        GROUP BY 
+            customer_id, gender, age, invoice_date,invoice_date,quantity,price
+    ),
+    rfm_calc AS (
+        SELECT *,
+            NTILE(3) OVER (ORDER BY last_date_order) AS rfm_recency,
+            NTILE(3) OVER (ORDER BY total_orders) AS rfm_frequency,
+            NTILE(3) OVER (ORDER BY revenue) AS rfm_monetary
+        FROM rfm_data
+    )
+    SELECT  customer_id, gender, age, last_date_order, total_orders, revenue,
+        rfm_recency + rfm_frequency + rfm_monetary AS rfm_score
+     
+        
+    FROM rfm_calc order by rfm_score desc  limit """ + str(num_customers) +""";
+    """
+        cursor.execute(query)
+        data = cursor.fetchall()
+        df = pd.DataFrame(data)
+        st.dataframe(df)
+        st.write("Displaying top customer insights here.")
+
+    # RFM Segmentation Section
+    if insight_menu == "RFM Segmentation":
+       
+         # Query to calculate segmentation
+        query = """
+        WITH rfm_data AS (
+        SELECT
+            customer_id, 
+            gender, 
+            age, 
+          
+            DATEDIFF('2024-01-01', invoice_date) AS last_date_order,
+            SUM(quantity) AS total_orders,
+            CAST(SUM(price * quantity ) AS DECIMAL(10, 2)) AS revenue  
+        FROM 
+            customer_data
+        GROUP BY 
+            customer_id, gender, age, invoice_date,invoice_date,quantity,price
+    ),
+    rfm_calc AS (
+        SELECT *,
+            NTILE(3) OVER (ORDER BY last_date_order) AS rfm_recency,
+            NTILE(3) OVER (ORDER BY total_orders) AS rfm_frequency,
+            NTILE(3) OVER (ORDER BY revenue) AS rfm_monetary
+        FROM rfm_data
+    )
+    SELECT  customer_id, gender, age, last_date_order, total_orders, revenue, rfm_recency, rfm_frequency, rfm_monetary,
+        rfm_recency + rfm_frequency + rfm_monetary AS rfm_score,
+        CONCAT(rfm_recency, rfm_frequency, rfm_monetary) AS rfm,
+        CASE
+            WHEN CONCAT(rfm_recency, rfm_frequency, rfm_monetary) IN ('311', '312', '311') THEN 'new customers'
+            WHEN CONCAT(rfm_recency, rfm_frequency, rfm_monetary) IN ('111', '121', '131', '122', '133', '113', '112', '132') THEN 'lost customers'
+            WHEN CONCAT(rfm_recency, rfm_frequency, rfm_monetary) IN ('212', '313', '123', '221', '211', '232') THEN 'regular customers'
+            WHEN CONCAT(rfm_recency, rfm_frequency, rfm_monetary) IN ('223', '222', '213', '322', '231', '321', '331') THEN 'loyal customers'
+            WHEN CONCAT(rfm_recency, rfm_frequency, rfm_monetary) IN ('333', '332', '323', '233') THEN 'top customers'
+        END AS rfm_segment
+    FROM rfm_calc;
+    """
+
+        # Execute the query
+        cursor.execute(query)
+        data = cursor.fetchall()
+
+        # Convert the result to a DataFrame
+        df = pd.DataFrame(data, columns=[
+        "customer_id", "gender", "age", 
+        "last_date_order", "total_orders", "revenue", "rfm_recency", 
+        "rfm_frequency", "rfm_monetary", "rfm_score", "rfm", "rfm_segment"
+        ])
+
+        # Visualization: Pie Chart for Segmentation
+        st.write("### Segmentation Distribution")
+        segment_counts = df["rfm_segment"].value_counts().reset_index()
+        segment_counts.columns = ["Segment", "Count"]
+
+        fig = px.pie(
+            segment_counts, 
+            names="Segment", 
+            values="Count", 
+            
+        )
+        st.plotly_chart(fig)
+####################22:15####################
+         # Dropdown for selecting a customer segment
+        segment_options = ["new customers", "lost customers", "regular customers", "loyal customers", "top customers"]
+        selected_segment = st.selectbox("Select a customer segment", segment_options)
+        if selected_segment=="new customers":
+            filter= "IN ('311', '312', '311')"
+        elif selected_segment=="lost customers":
+            filter="IN ('111', '121', '131', '122', '133', '113', '112', '132')"
+        elif selected_segment=="regular customers":
+            filter="IN ('212', '313', '123', '221', '211', '232')"
+        elif selected_segment=="loyal customers":
+            filter="IN ('223', '222', '213', '322', '231', '321', '331')"
+        elif selected_segment=="top customers":
+            filter=" IN ('333', '332', '323', '233')"
+        
+        
+        query =  """
+    WITH rfm_data AS (
+        SELECT
+            customer_id, 
+            gender, 
+            age, 
+          
+            DATEDIFF('2024-01-01', invoice_date) AS last_date_order,
+            SUM(quantity) AS total_orders,
+            CAST(SUM(price * quantity ) AS DECIMAL(10, 2)) AS revenue  
+        FROM 
+            customer_data
+        GROUP BY 
+            customer_id, gender, age, invoice_date,invoice_date,quantity,price
+    ),
+    rfm_calc AS (
+        SELECT *,
+            NTILE(3) OVER (ORDER BY last_date_order) AS rfm_recency,
+            NTILE(3) OVER (ORDER BY total_orders) AS rfm_frequency,
+            NTILE(3) OVER (ORDER BY revenue) AS rfm_monetary
+        FROM rfm_data
+    )
+    SELECT  customer_id, gender, age, last_date_order, total_orders, revenue,
+     
+        CASE
+            WHEN CONCAT(rfm_recency, rfm_frequency, rfm_monetary) IN ('311', '312', '311') THEN 'new customers'
+            WHEN CONCAT(rfm_recency, rfm_frequency, rfm_monetary) IN ('111', '121', '131', '122', '133', '113', '112', '132') THEN 'lost customers'
+            WHEN CONCAT(rfm_recency, rfm_frequency, rfm_monetary) IN ('212', '313', '123', '221', '211', '232') THEN 'regular customers'
+            WHEN CONCAT(rfm_recency, rfm_frequency, rfm_monetary) IN ('223', '222', '213', '322', '231', '321', '331') THEN 'loyal customers'
+            WHEN CONCAT(rfm_recency, rfm_frequency, rfm_monetary) IN ('333', '332', '323', '233') THEN 'top customers'
+        END AS rfm_segment
+    FROM rfm_calc where CONCAT(rfm_recency, rfm_frequency, rfm_monetary)  """ + filter +""";
+    """
+        cursor.execute(query)
+        data = cursor.fetchall()
+        df = pd.DataFrame(data)
+        st.dataframe(df)
+        
+
+    # Acquiring New Customers Section
+    if insight_menu == "Acquiring New Customers":
+        st.header("Acquiring New Customers")
+        # Add logic for acquiring new customers
+        st.write("Display strategies for acquiring new customers here.")
+
+    # Product Recommendations Section
+    if insight_menu == "Product Recommendations":
+        st.header("Product Recommendations")
+        # Add logic for product recommendations
+        st.write("Display recommended products for customers here.")
+
+    # Predicting Churn Section
+    if insight_menu == "Predicting Churn":
+        st.header("Predicting Customer Churn")
+        query =  """
+    WITH rfm_data AS (
+        SELECT
+            customer_id, 
+            gender, 
+            age, 
+          
+            DATEDIFF('2024-01-01', invoice_date) AS last_date_order,
+            SUM(quantity) AS total_orders,
+            CAST(SUM(price * quantity ) AS DECIMAL(10, 2)) AS revenue  
+        FROM 
+            customer_data
+        GROUP BY 
+            customer_id, gender, age, invoice_date,invoice_date,quantity,price
+    ),
+    rfm_calc AS (
+        SELECT *,
+            NTILE(3) OVER (ORDER BY last_date_order) AS rfm_recency,
+            NTILE(3) OVER (ORDER BY total_orders) AS rfm_frequency,
+            NTILE(3) OVER (ORDER BY revenue) AS rfm_monetary
+        FROM rfm_data
+    )
+    SELECT  customer_id, gender, age, last_date_order, total_orders, revenue,
+    rfm_recency + rfm_frequency + rfm_monetary AS rfm_score
+    FROM rfm_calc where CONCAT(rfm_recency, rfm_frequency, rfm_monetary)  IN ('111', '121', '131', '122', '133', '113', '112', '132')
+    LIMIT 30;
+    """
+        cursor.execute(query)
+        data = cursor.fetchall()
+        df = pd.DataFrame(data)
+        st.dataframe(df) 
+        # Add logic for churn prediction
+        st.write("Display churn prediction insights here.")
+    
+
+
 
 # Add Entry
 elif choice == "Add Entry":
