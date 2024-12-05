@@ -30,11 +30,60 @@ if main_menu == "View Data":
     # View Data
     if choice == "View Data":
         st.subheader("View Customer Data")
-        query = "SELECT * FROM customer_data"
-        cursor.execute(query)
-        data = cursor.fetchall()
-        df = pd.DataFrame(data)
-        st.dataframe(df)
+         # Search filters
+        custid = st.text_input("Customer ID")
+        invoice_number = st.text_input("Invoice Number")
+        gender = st.selectbox("Gender", ["", "Male", "Female"])
+        category = st.selectbox("Category", ["", "Books", "Clothing", "Cosmetics", "Food & Beverage", "Shoes", "Souvenir", "Technology", "Toys"])
+        shopping_mall = st.selectbox("Shopping Mall",["", "Cevahir AVM", "Emaar Square Mall", "Forum Istanbul", "Istinye Park", "Kanyon", "Mall of Istanbul", "Metrocity", "Metropol AVM", "Viaport Outlet", "Zorlu Center"])
+
+        col1, col2 = st.columns(2)
+        with col1:
+            search = st.button("Search")
+        with col2:
+            reset = st.button("Reset")
+        
+        # Initial page load: Display all records
+        if not search and not reset:
+            query = "SELECT * FROM customer_data"
+            cursor.execute(query)
+            data = cursor.fetchall()
+            df = pd.DataFrame(data)
+            st.dataframe(df)
+        
+        if search:
+            # Build the query with filters
+            query = "SELECT * FROM customer_data WHERE 1=1"
+            if custid:
+                query += f" AND customer_id = '{custid}'"
+            if invoice_number:
+                query += f" AND invoice_number = '{invoice_number}'"
+            if gender:
+                query += f" AND gender = '{gender}'"
+            if category:
+                query += f" AND category = '{category}'"
+            if shopping_mall:
+                query += f" AND shopping_mall = '{shopping_mall}'"
+        
+            cursor.execute(query)
+            data = cursor.fetchall()
+            df = pd.DataFrame(data)
+            st.dataframe(df)
+
+        if reset:
+            # Clear all input fields and show all records
+            custid = ""
+            invoice_number = ""
+            gender = ""
+            category = ""
+            shopping_mall = ""
+            
+            query = "SELECT * FROM customer_data"
+            cursor.execute(query)
+            data = cursor.fetchall()
+            df = pd.DataFrame(data)
+            st.dataframe(df)
+            
 
 ########################################################
 # Customer Insights Section
@@ -261,28 +310,138 @@ elif choice == "Add Entry":
     st.subheader("Add New Customer Entry")
     with st.form("add_form"):
         invoice_number = st.text_input("Invoice Number")
+        invoice_number_error = st.empty()
+        
         customer_id = st.text_input("Customer ID")
+        customer_id_error = st.empty()
+        
         gender = st.selectbox("Gender", ["Male", "Female"])
+        gender_error = st.empty()
+        
         age = st.number_input("Age", min_value=1, max_value=120)
-        category = st.text_input("Category")
+        age_error = st.empty()
+        
+        category = st.selectbox("Category",[
+        "Books",
+        "Clothing",
+        "Cosmetics",
+        "Food & Beverage",
+        "Shoes",
+        "Souvenir",
+        "Technology",
+        "Toys"])
+        category_error = st.empty()
+        
         quantity = st.number_input("Quantity", min_value=1)
+        quantity_error = st.empty()
+        
         price = st.number_input("Price", min_value=0.0)
-        payment_method = st.text_input("Payment Method")
+        price_error = st.empty()
+        
+        payment_method = st.selectbox("Payment Method",[ "Cash", "Credit Card", "Debit Card"])
+        payment_method_error = st.empty()
+        
         invoice_date = st.date_input("Invoice Date")
-        shopping_mall = st.text_input("Shopping Mall")
+        invoice_date_error = st.empty()
+        
+        shopping_mall = st.selectbox("Shopping Mall",[
+            "Cevahir AVM",
+            "Emaar Square Mall",
+            "Forum Istanbul",
+            "Istinye Park",
+            "Kanyon",
+            "Mall of Istanbul",
+            "Metrocity",
+            "Metropol AVM",
+            "Viaport Outlet",
+            "Zorlu Center", ])
+        
+        shopping_mall_error = st.empty()
+        
         #location = st.text_input("Location")
         submitted = st.form_submit_button("Add Entry")
 
         if submitted:
-            query = """
-                INSERT INTO customer_data (invoice_number, customer_id, gender, age, category, quantity, price, payment_method, invoice_date, shopping_mall)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """
-            values = (invoice_number, customer_id, gender, age, category, quantity, price, payment_method, invoice_date, shopping_mall)
-            cursor.execute(query, values)
-            conn.commit()
-            st.success("New entry added successfully!")
-
+            has_error = False
+            
+            if not invoice_number:
+                invoice_number_error.error("Invoice Number is required.")
+                has_error = True
+            elif not re.match("^[a-zA-Z0-9]*$", invoice_number):
+                invoice_number_error.error("Invoice Number should be alphanumeric.")
+                has_error = True
+            else:
+                invoice_number_error.empty()
+            
+            if not customer_id:
+                customer_id_error.error("Customer ID is required.")
+                has_error = True
+            elif not re.match("^[a-zA-Z0-9]*$", customer_id):
+                customer_id_error.error("Customer ID should be alphanumeric.")
+                has_error = True
+            else:
+                customer_id_error.empty()
+            
+            if not gender:
+                gender_error.error("Gender is required.")
+                has_error = True
+            else:
+                gender_error.empty()
+            
+            if not age:
+                age_error.error("Age is required.")
+                has_error = True
+            else:
+                age_error.empty()
+            
+            if not category:
+                category_error.error("Category is required.")
+                has_error = True
+            else:
+                category_error.empty()
+            
+            if not quantity:
+                quantity_error.error("Quantity is required.")
+                has_error = True
+            else:
+                quantity_error.empty()
+            
+            if not price:
+                price_error.error("Price is required.")
+                has_error = True
+            else:
+                price_error.empty()
+            
+            if not payment_method:
+                payment_method_error.error("Payment Method is required.")
+                has_error = True
+            else:
+                payment_method_error.empty()
+            
+            if not invoice_date:
+                invoice_date_error.error("Invoice Date is required.")
+                has_error = True
+            elif invoice_date > datetime.date.today():
+                invoice_date_error.error("Invoice Date cannot be in the future.")
+                has_error = True
+            else:
+                invoice_date_error.empty()
+            
+            if not shopping_mall:
+                shopping_mall_error.error("Shopping Mall is required.")
+                has_error = True
+            else:
+                shopping_mall_error.empty()
+            
+            if not has_error:
+                query = """
+                    INSERT INTO customer_data (invoice_number, customer_id, gender, age, category, quantity, price, payment_method, invoice_date, shopping_mall)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """
+                values = (invoice_number, customer_id, gender, age, category, quantity, price, payment_method, invoice_date, shopping_mall)
+                cursor.execute(query, values)
+                conn.commit()
+                st.success("New entry added successfully!")
 # Update Entry
 elif choice == "Update Entry":
     st.subheader("Update Customer Entry")
