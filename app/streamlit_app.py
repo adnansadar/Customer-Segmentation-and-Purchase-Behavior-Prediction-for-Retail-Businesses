@@ -448,9 +448,10 @@ elif choice == "Update Entry":
 
     # Step 1: Fetch Data
     customer_id = st.text_input("Enter Customer ID to Update")
+    invoice_number = st.text_input("Enter Invoice Number to Update")
     if st.button("Fetch Data"):
         # Fetch the data for the entered customer ID
-        query = "SELECT * FROM customer_data WHERE customer_id = %s"
+        query = "SELECT * FROM customer_data WHERE customer_id = %s and invoice_number = %s"
         cursor.execute(query, (customer_id,))
         result = cursor.fetchone()
         
@@ -493,8 +494,9 @@ elif choice == "Update Entry":
 elif choice == "Delete Entry":
     st.subheader("Delete Customer Entry")
     customer_id = st.text_input("Enter Customer ID to Delete")
+    invoice_number = st.text_input("Enter Invoice Number to Delete")
     if st.button("Delete Entry"):
-        query = "DELETE FROM customer_data WHERE customer_id = %s"
+        query = "DELETE FROM customer_data WHERE customer_id = %s and invoice_number = %s"
         cursor.execute(query, (customer_id,))
         conn.commit()
         st.success("Entry deleted successfully!")
