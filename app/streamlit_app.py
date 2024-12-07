@@ -11,6 +11,7 @@ from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegress
 from sklearn.metrics import classification_report, accuracy_score, mean_squared_error
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import MinMaxScaler, LabelEncoder
+import datetime
 
 # Title of the app
 st.title("Customer Insights and Segmentation Dashboard")
