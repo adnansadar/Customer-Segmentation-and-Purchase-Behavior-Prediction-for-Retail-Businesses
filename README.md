@@ -64,3 +64,49 @@
 - **Question:** How do external factors affect customer purchasing decisions?
 - **Code Location:** `src/brunda_external_factors.ipynb`
 - **Analysis Location:** `src/brunda_external_factors.ipynb`
+
+## Instructions to Build and Run the App
+
+### Prerequisites
+
+1. **Python**: Ensure you have Python 3.7 or higher installed. You can download it from [python.org](https://www.python.org/downloads/).
+2. **Git**: Ensure you have Git installed. You can download it from [git-scm.com](https://git-scm.com/downloads).
+
+### Instructions
+
+1. **Clone the Repository**:
+   Open a terminal and clone the repository using Git:
+
+   ```sh
+   git clone <repository-url>
+   cd <repository-directory>
+   ```
+
+2. **Install Dependencies**:
+   Install the required Python packages using `pip`:
+
+   ```sh
+   pip install -r requirements.txt
+   ```
+
+3. **Set Up Environment Variables**:
+   Create a `.env` file in the `app` directory with the following content:
+
+   ```env
+   DB_HOST=YOUR_HOSTNAME
+   DB_USER=YOUR_USERNAME
+   DB_PASSWORD=YOUR_PW
+   DB_NAME=YOUR_DBNAME
+   DB_PORT=YOUR_PORTNO
+   ```
+
+4. **Run the Streamlit App**:
+   Navigate to the `app` directory and run the Streamlit app:
+
+   ```sh
+   cd app
+   streamlit run streamlit_app.py
+   ```
+
+5. **Additional Notes**:
+   - **Database Setup**: Ensure that your MySQL database is running and accessible with the credentials provided in the `.env` file.
