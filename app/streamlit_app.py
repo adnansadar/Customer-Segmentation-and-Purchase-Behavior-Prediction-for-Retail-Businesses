@@ -767,9 +767,9 @@ if main_menu == "Questions":
         # User Input for Classification
         st.write("### Enter Customer Information for Prediction:")
         gender = st.selectbox("Gender", ["Male", "Female"])
-        age = st.number_input("Age", min_value=0, step=1)
+        age = st.number_input("Age", min_value=10, step=1)
         quantity = st.number_input("Quantity Purchased", min_value=1, step=1)
-        price = st.number_input("Price of Product", min_value=0.0, step=0.1)
+        price = st.number_input("Price of Product", min_value=1.0, step=0.1)
 
         # Encode Gender Input
         gender_encoded = 0 if gender == "Male" else 1
