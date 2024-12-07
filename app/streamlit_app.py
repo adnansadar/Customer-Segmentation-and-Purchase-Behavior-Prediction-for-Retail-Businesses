@@ -47,11 +47,11 @@ def preprocess_data(data):
 st.sidebar.title("Menu")
 main_menu = st.sidebar.selectbox(
     "Main Menu",
-    ["CRUD Operations", "Questions"]
+    ["Data Management", "Data Driven Insights"]
 )
 
 # View Data Section
-if main_menu == "CRUD Operations":
+if main_menu == "Data Management":
     menu = ["View Data", "Add Entry", "Update Entry", "Delete Entry", "Visualizations"]
     choice = st.sidebar.selectbox("Menu", menu)
 
@@ -379,9 +379,9 @@ if main_menu == "CRUD Operations":
             
 
 ########################################################
-# Questions Section
-if main_menu == "Questions":
-    st.title("Questions")
+# Data Driven Insights Section
+if main_menu == "Data Driven Insights":
+    st.title("Data Driven Insights")
     
     # Sub-menu for Customer Insights
     questions_menu = st.radio(
