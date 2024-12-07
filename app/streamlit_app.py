@@ -740,7 +740,7 @@ if main_menu == "Questions":
 
      # Customer Segmentation Section
     if questions_menu == "Customer Segmentation":
-        st.header("Customer Segmentation: Classify Customers Based on Purchasing Behavior")
+        st.header("What customer behaviors (age, gender, price sensitivity, and quantity purchased) predict product category preferences?")
 
         # Fetch data from the database
         query = "SELECT * FROM customer_data"
