@@ -376,22 +376,23 @@ if main_menu == "Questions":
             gender, 
             age, 
           
-            DATEDIFF('2024-01-01', invoice_date) AS last_date_order,
+            DATEDIFF('2023-12-31', invoice_date) AS last_date_order,
             SUM(quantity) AS total_orders,
             CAST(SUM(price * quantity ) AS DECIMAL(10, 2)) AS revenue  
         FROM 
             customer_data
         GROUP BY 
-            customer_id, gender, age, invoice_date,invoice_date,quantity,price
+            customer_id, gender, age
     ),
     rfm_calc AS (
         SELECT *,
-            NTILE(3) OVER (ORDER BY last_date_order) AS rfm_recency,
-            NTILE(3) OVER (ORDER BY total_orders) AS rfm_frequency,
-            NTILE(3) OVER (ORDER BY revenue) AS rfm_monetary
+             NTILE(5) OVER (ORDER BY last_date_order) AS rfm_recency,
+            NTILE(5) OVER (ORDER BY total_orders) AS rfm_frequency,
+            NTILE(5) OVER (ORDER BY revenue) AS rfm_monetary
         FROM rfm_data
     )
     SELECT  customer_id, gender, age, last_date_order, total_orders, revenue,
+    rfm_recency , rfm_frequency , rfm_monetary ,
         rfm_recency + rfm_frequency + rfm_monetary AS rfm_score
      
         
@@ -399,9 +400,32 @@ if main_menu == "Questions":
     """
         cursor.execute(query)
         data = cursor.fetchall()
-        df = pd.DataFrame(data)
+        df = pd.DataFrame(data, columns=["customer_id", "total_orders", "revenue", "last_date_order", "rfm_score"])
+        from sklearn.preprocessing import StandardScaler
+
+        scaler = StandardScaler()
+        features = ["total_orders", "revenue", "last_date_order", "rfm_score"]
+        scaled_data = scaler.fit_transform(df[features])
+        from sklearn.cluster import KMeans
+
+        # User selects the number of clusters
+        num_clusters = st.slider("Select the number of clusters", 2, 10, 3)
+
+        # Apply K-Means
+        kmeans = KMeans(n_clusters=num_clusters, random_state=42)
+        df["Cluster"] = kmeans.fit_predict(scaled_data)
+
+        #     Display results
+        st.write(f"Customer Segments with {num_clusters} Clusters:")
+        df = df.drop(columns=["last_date_order"])
         st.dataframe(df)
-        st.write("Displaying top customer insights here.")
+
+        import plotly.express as px
+
+        fig = px.scatter(df, x="total_orders", y="revenue", color="Cluster", 
+                 title="Customer Segments by Revenue and Orders",
+                 hover_data=["customer_id"])
+        st.plotly_chart(fig)
 
     # RFM Segmentation Section
     if questions_menu == "RFM Segmentation":
@@ -467,6 +491,7 @@ if main_menu == "Questions":
         st.plotly_chart(fig)
 ####################22:15####################
          # Dropdown for selecting a customer segment
+        st.header("Check customers based on their segments")
         segment_options = ["new customers", "lost customers", "regular customers", "loyal customers", "top customers"]
         selected_segment = st.selectbox("Select a customer segment", segment_options)
         if selected_segment=="new customers":
@@ -518,7 +543,111 @@ if main_menu == "Questions":
         data = cursor.fetchall()
         df = pd.DataFrame(data)
         st.dataframe(df)
-        
+            
+    ################decision tree #####################33
+    st.header("RFM Segmentation Analysis (Decision Tree Classifier)")
+
+    # Fetch RFM data from the database
+    query = """
+    WITH rfm_data AS (
+        SELECT
+            customer_id, 
+            gender, 
+            age, 
+            DATEDIFF('2024-01-01', invoice_date) AS last_date_order,
+            SUM(quantity) AS total_orders,
+            CAST(SUM(price * quantity ) AS DECIMAL(10, 2)) AS revenue  
+        FROM 
+            customer_data
+        GROUP BY 
+            customer_id, gender, age, invoice_date, invoice_date, quantity, price
+    ),
+    rfm_calc AS (
+        SELECT *,
+            NTILE(3) OVER (ORDER BY last_date_order) AS rfm_recency,
+            NTILE(3) OVER (ORDER BY total_orders) AS rfm_frequency,
+            NTILE(3) OVER (ORDER BY revenue) AS rfm_monetary
+        FROM rfm_data
+    )
+    SELECT  
+        customer_id, gender, age, last_date_order, total_orders, revenue, 
+        rfm_recency, rfm_frequency, rfm_monetary,
+        rfm_recency + rfm_frequency + rfm_monetary AS rfm_score,
+        CONCAT(rfm_recency, rfm_frequency, rfm_monetary) AS rfm,
+        CASE
+            WHEN CONCAT(rfm_recency, rfm_frequency, rfm_monetary) IN ('311', '312', '311') THEN 'new customers'
+            WHEN CONCAT(rfm_recency, rfm_frequency, rfm_monetary) IN ('111', '121', '131', '122', '133', '113', '112', '132') THEN 'lost customers'
+            WHEN CONCAT(rfm_recency, rfm_frequency, rfm_monetary) IN ('212', '313', '123', '221', '211', '232') THEN 'regular customers'
+            WHEN CONCAT(rfm_recency, rfm_frequency, rfm_monetary) IN ('223', '222', '213', '322', '231', '321', '331') THEN 'loyal customers'
+            WHEN CONCAT(rfm_recency, rfm_frequency, rfm_monetary) IN ('333', '332', '323', '233') THEN 'top customers'
+        END AS rfm_segment
+    FROM rfm_calc;
+    """
+    
+    cursor.execute(query)
+    result = cursor.fetchall()
+
+    # Convert query result into a DataFrame
+    rfm_df = pd.DataFrame(result, columns=["customer_id", "gender", "age", "last_date_order", 
+                                           "total_orders", "revenue", "rfm_recency", 
+                                           "rfm_frequency", "rfm_monetary", "rfm_score", 
+                                           "rfm", "rfm_segment"])
+
+    # Prepare the data for Decision Tree Classification
+    features = ["total_orders", "revenue", "rfm_recency", "rfm_frequency", "rfm_monetary"]
+    X = rfm_df[features]
+    y = rfm_df["rfm_segment"]
+
+    # Encode categorical target variable
+    from sklearn.preprocessing import LabelEncoder
+    label_encoder = LabelEncoder()
+    y_encoded = label_encoder.fit_transform(y)
+
+    # Split the data into training and testing sets
+    from sklearn.model_selection import train_test_split
+    X_train, X_test, y_train, y_test = train_test_split(X, y_encoded, test_size=0.2, random_state=42)
+
+    # Train the Decision Tree Classifier
+    from sklearn.tree import DecisionTreeClassifier
+    clf = DecisionTreeClassifier(random_state=42, max_depth=5)
+    clf.fit(X_train, y_train)
+
+    # Predict and evaluate
+    y_pred = clf.predict(X_test)
+
+    # Calculate accuracy
+    from sklearn.metrics import accuracy_score
+    accuracy = accuracy_score(y_test, y_pred)
+    st.subheader(f"Model Accuracy: {accuracy:.2f}")
+
+    # Allow the user to input features for prediction
+    st.subheader("Predict Customer Segment")
+    user_input = {
+        "total_orders": st.number_input("Enter Total Orders", value=10, step=1),
+        "revenue": st.number_input("Enter Revenue", value=5000.0, step=100.0),
+        "rfm_recency": st.number_input("Enter RFM Recency (1-3)", value=2, step=1),
+        "rfm_frequency": st.number_input("Enter RFM Frequency (1-3)", value=2, step=1),
+        "rfm_monetary": st.number_input("Enter RFM Monetary (1-3)", value=2, step=1),
+    }
+
+    # Convert user input into a DataFrame
+    user_df = pd.DataFrame([user_input])
+
+    # Predict the segment for the input
+    predicted_segment = clf.predict(user_df)
+    segment_label = label_encoder.inverse_transform(predicted_segment)[0]
+
+    st.subheader(f"Predicted Segment: {segment_label}")
+
+    # Visualize feature importance
+    st.subheader("Feature Importance")
+    importance = clf.feature_importances_
+    feature_importance_df = pd.DataFrame({"Feature": features, "Importance": importance})
+    feature_importance_df = feature_importance_df.sort_values(by="Importance", ascending=False)
+    st.bar_chart(feature_importance_df.set_index("Feature"))
+
+
+   
 
     # Acquiring New Customers Section
     if questions_menu == "Acquiring New Customers":
