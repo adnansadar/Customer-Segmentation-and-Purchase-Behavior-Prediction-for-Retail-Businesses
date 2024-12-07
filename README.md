@@ -1,5 +1,7 @@
 # Customer-Segmentation-and-Purchase-Behavior-Prediction-for-Retail-Businesses
 
+## This streamlit web-app is deployed on [this url](https://customer-insight-engine.streamlit.app/)
+
 ## Team Number 29
 
 | Name                           | UB Number |
