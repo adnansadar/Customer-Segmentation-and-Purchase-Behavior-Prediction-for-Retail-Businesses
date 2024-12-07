@@ -2,6 +2,15 @@ import streamlit as st
 import pandas as pd
 from database import connect_to_db
 import plotly.express as px
+import numpy as np
+import re
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
+from sklearn.metrics import classification_report, accuracy_score, mean_squared_error
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import MinMaxScaler, LabelEncoder
 
 # Title of the app
 st.title("Customer Insights and Segmentation Dashboard")
@@ -16,6 +25,23 @@ try:
 except Exception as e:
     st.error(f"Error: {e}")
     st.stop()
+
+
+# Preprocessing Function
+def preprocess_data(data):
+    # Handle missing values
+    data = data.dropna()
+    
+    # Encode categorical variables
+    le_gender = LabelEncoder()
+    data['gender'] = le_gender.fit_transform(data['gender'])
+    
+    # Scale numeric features
+    scaler = MinMaxScaler()
+    data[['quantity', 'price']] = scaler.fit_transform(data[['quantity', 'price']])
+    
+    return data
+
 
 # Sidebar Main Menu
 st.sidebar.title("Menu")
@@ -360,7 +386,7 @@ if main_menu == "Questions":
     # Sub-menu for Customer Insights
     questions_menu = st.radio(
         "Choose a section",
-        ["Top Customers", "RFM Segmentation", "Acquiring New Customers", "Product Recommendations", "Predicting Churn"]
+        ["Top Customers", "RFM Segmentation", "Sales Analysis: Age Group","Customer Segmentation"]
     )
 
     # Top Customers Section
@@ -648,56 +674,161 @@ if main_menu == "Questions":
         data = cursor.fetchall()
         df = pd.DataFrame(data)
         st.dataframe(df)
-   
 
-    # Acquiring New Customers Section
-    if questions_menu == "Acquiring New Customers":
-        st.header("Acquiring New Customers")
-        # Add logic for acquiring new customers
-        st.write("Display strategies for acquiring new customers here.")
+    # Sales Analysis Section
+    if questions_menu == "Sales Analysis: Age Group":
+        st.header("How do age groups influence the quantity of products purchased and their preferred product categories?")
 
-    # Product Recommendations Section
-    if questions_menu == "Product Recommendations":
-        st.header("Product Recommendations")
-        # Add logic for product recommendations
-        st.write("Display recommended products for customers here.")
-
-    # Predicting Churn Section
-    if questions_menu == "Predicting Churn":
-        st.header("Predicting Customer Churn")
-        query =  """
-    WITH rfm_data AS (
-        SELECT
-            customer_id, 
-            gender, 
-            age, 
-          
-            DATEDIFF('2024-01-01', invoice_date) AS last_date_order,
-            SUM(quantity) AS total_orders,
-            CAST(SUM(price * quantity ) AS DECIMAL(10, 2)) AS revenue  
-        FROM 
-            customer_data
-        GROUP BY 
-            customer_id, gender, age, invoice_date,invoice_date,quantity,price
-    ),
-    rfm_calc AS (
-        SELECT *,
-            NTILE(3) OVER (ORDER BY last_date_order) AS rfm_recency,
-            NTILE(3) OVER (ORDER BY total_orders) AS rfm_frequency,
-            NTILE(3) OVER (ORDER BY revenue) AS rfm_monetary
-        FROM rfm_data
-    )
-    SELECT  customer_id, gender, age, last_date_order, total_orders, revenue,
-    rfm_recency + rfm_frequency + rfm_monetary AS rfm_score
-    FROM rfm_calc where CONCAT(rfm_recency, rfm_frequency, rfm_monetary)  IN ('111', '121', '131', '122', '133', '113', '112', '132')
-    LIMIT 30;
-    """
+        # Fetch data from the database
+        query = "SELECT * FROM customer_data"
         cursor.execute(query)
         data = cursor.fetchall()
         df = pd.DataFrame(data)
-        st.dataframe(df) 
-        # Add logic for churn prediction
-        st.write("Display churn prediction insights here.")
+
+        # Preprocess data for clustering
+        df = preprocess_data(df)
+
+        # Perform Clustering
+        kmeans = KMeans(n_clusters=3, random_state=42)
+        df['age_group'] = kmeans.fit_predict(df[['age']])
+
+        # Analyze the age ranges for each cluster
+        cluster_ranges = (
+            df.groupby('age_group')['age']
+            .agg(['min', 'max', 'mean'])
+            .reset_index()
+        )
+        st.write("### Age Group Ranges:")
+        st.dataframe(cluster_ranges)
+
+        # Map cluster labels to meaningful age groups (adjust based on cluster_ranges)
+        age_group_labels = {
+            0: "Young Adults (18-30)",
+            1: "Middle-Aged (31-50)",
+            2: "Seniors (51+)"
+        }
+        df['age_group_label'] = df['age_group'].map(age_group_labels)
+
+        # Summarize total products purchased by labeled age groups
+        age_group_summary = df.groupby('age_group_label')['quantity'].sum().reset_index()
+
+        # Update bar chart to use labeled groups
+        st.write("### Total Products Purchased by Age Group:")
+        fig = px.bar(
+            age_group_summary,
+            x='age_group_label',
+            y='quantity',
+            title="Total Products Purchased by Age Group",
+            labels={'age_group_label': 'Age Group', 'quantity': 'Total Products'}
+        )
+        st.plotly_chart(fig)
+
+        # Identify the most purchased product category for each age group
+        category_summary = (
+            df.groupby(['age_group_label', 'category'])['quantity']
+            .sum()
+            .reset_index()
+        )
+        most_purchased_categories = (
+            category_summary.loc[
+                category_summary.groupby('age_group_label')['quantity'].idxmax()
+            ]
+        )
+
+        st.write("### Most Purchased Product Category by Age Group")
+        st.dataframe(most_purchased_categories[['age_group_label', 'category', 'quantity']])
+
+     # Customer Segmentation Section
+    if questions_menu == "Customer Segmentation":
+        st.header("Customer Segmentation: Classify Customers Based on Purchasing Behavior")
+
+        # Fetch data from the database
+        query = "SELECT * FROM customer_data"
+        cursor.execute(query)
+        data = cursor.fetchall()
+        df = pd.DataFrame(data)
+
+        # Preprocess data for classification
+        df = preprocess_data(df)
+        features = ['gender', 'age', 'quantity', 'price']
+        X = df[features]
+        y = df['category']  # Target is the product category
+
+        # Train/Test Split
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+        # Train Decision Tree Classifier
+        clf = DecisionTreeClassifier(random_state=42)
+        clf.fit(X_train, y_train)
+
+        # Model Evaluation
+        y_pred = clf.predict(X_test)
+
+        # User Input for Classification
+        st.write("### Enter Customer Information for Prediction:")
+        gender = st.selectbox("Gender", ["Male", "Female"])
+        age = st.number_input("Age", min_value=0, step=1)
+        quantity = st.number_input("Quantity Purchased", min_value=1, step=1)
+        price = st.number_input("Price of Product", min_value=0.0, step=0.1)
+
+        # Encode Gender Input
+        gender_encoded = 0 if gender == "Male" else 1
+
+        # Prediction
+        if st.button("Classify Customer"):
+            prediction = clf.predict([[gender_encoded, age, quantity, price]])
+            st.write(f"The customer is classified under the '{prediction[0]}' category.")
+
+    
+
+    # # Acquiring New Customers Section
+    # if questions_menu == "Acquiring New Customers":
+    #     st.header("Acquiring New Customers")
+    #     # Add logic for acquiring new customers
+    #     st.write("Display strategies for acquiring new customers here.")
+
+    # # Product Recommendations Section
+    # if questions_menu == "Product Recommendations":
+    #     st.header("Product Recommendations")
+    #     # Add logic for product recommendations
+    #     st.write("Display recommended products for customers here.")
+
+    # # Predicting Churn Section
+    # if questions_menu == "Predicting Churn":
+    #     st.header("Predicting Customer Churn")
+    #     query =  """
+    # WITH rfm_data AS (
+    #     SELECT
+    #         customer_id, 
+    #         gender, 
+    #         age, 
+          
+    #         DATEDIFF('2024-01-01', invoice_date) AS last_date_order,
+    #         SUM(quantity) AS total_orders,
+    #         CAST(SUM(price * quantity ) AS DECIMAL(10, 2)) AS revenue  
+    #     FROM 
+    #         customer_data
+    #     GROUP BY 
+    #         customer_id, gender, age, invoice_date,invoice_date,quantity,price
+    # ),
+    # rfm_calc AS (
+    #     SELECT *,
+    #         NTILE(3) OVER (ORDER BY last_date_order) AS rfm_recency,
+    #         NTILE(3) OVER (ORDER BY total_orders) AS rfm_frequency,
+    #         NTILE(3) OVER (ORDER BY revenue) AS rfm_monetary
+    #     FROM rfm_data
+    # )
+    # SELECT  customer_id, gender, age, last_date_order, total_orders, revenue,
+    # rfm_recency + rfm_frequency + rfm_monetary AS rfm_score
+    # FROM rfm_calc where CONCAT(rfm_recency, rfm_frequency, rfm_monetary)  IN ('111', '121', '131', '122', '133', '113', '112', '132')
+    # LIMIT 30;
+    # """
+    #     cursor.execute(query)
+    #     data = cursor.fetchall()
+    #     df = pd.DataFrame(data)
+    #     st.dataframe(df) 
+    #     # Add logic for churn prediction
+    #     st.write("Display churn prediction insights here.")
     
 
 
