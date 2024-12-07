@@ -4,11 +4,11 @@ import plotly.express as px
 import numpy as np
 import re
 from database import connect_to_db
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
-from sklearn.metrics import classification_report, accuracy_score, mean_squared_error
+# from sklearn.model_selection import train_test_split
+# from sklearn.linear_model import LogisticRegression
+# from sklearn.tree import DecisionTreeClassifier
+# from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
+# from sklearn.metrics import classification_report, accuracy_score, mean_squared_error
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import MinMaxScaler, LabelEncoder
 
@@ -389,7 +389,7 @@ if main_menu == "Questions":
     # Sub-menu for Customer Insights
     questions_menu = st.radio(
         "Choose a question",
-        ["Top Customers", "RFM Segmentation", "Sales Analysis: Age Group","Customer Segmentation"]
+        ["Top Customers", "RFM Segmentation", "Sales Analysis: Age Group"]
     )
 
     # Top Customers Section
@@ -547,7 +547,7 @@ if main_menu == "Questions":
         data = cursor.fetchall()
         df = pd.DataFrame(data)
         st.dataframe(df)
-    # Sales Analysis Section
+    # Sales Analysis Section (New Implementation)
     if questions_menu == "Sales Analysis: Age Group":
         st.header("How do age groups influence the quantity of products purchased and their preferred product categories?")
 
@@ -613,47 +613,6 @@ if main_menu == "Questions":
         # # Display the labeled clustered data
         # st.write("Clustered Data Sample:")
         # st.dataframe(df[['age', 'quantity', 'age_group_label']].head())
-
- # Customer Segmentation Section
-    elif questions_menu == "Customer Segmentation":
-        st.header("Customer Segmentation: Classify Customers Based on Purchasing Behavior")
-
-        # Fetch data from the database
-        query = "SELECT * FROM customer_data"
-        cursor.execute(query)
-        data = cursor.fetchall()
-        df = pd.DataFrame(data)
-
-        # Preprocess data for classification
-        df = preprocess_data(df)
-        features = ['gender', 'age', 'quantity', 'price']
-        X = df[features]
-        y = df['category']  # Target is the product category
-
-        # Train/Test Split
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-        # Train Decision Tree Classifier
-        clf = DecisionTreeClassifier(random_state=42)
-        clf.fit(X_train, y_train)
-
-        # Model Evaluation
-        y_pred = clf.predict(X_test)
-
-        # User Input for Classification
-        st.write("### Enter Customer Information for Prediction:")
-        gender = st.selectbox("Gender", ["Male", "Female"])
-        age = st.number_input("Age", min_value=0, step=1)
-        quantity = st.number_input("Quantity Purchased", min_value=1, step=1)
-        price = st.number_input("Price of Product", min_value=0.0, step=0.1)
-
-        # Encode Gender Input
-        gender_encoded = 0 if gender == "Male" else 1
-
-        # Prediction
-        if st.button("Classify Customer"):
-            prediction = clf.predict([[gender_encoded, age, quantity, price]])
-            st.write(f"The customer is classified under the '{prediction[0]}' category.")
 
 
 
