@@ -261,7 +261,7 @@ if main_menu == "Data Management":
         if st.button("Fetch Data"):
             # Fetch the data for the entered customer ID
             query = "SELECT * FROM customer_data WHERE customer_id = %s and invoice_number = %s"
-            cursor.execute(query, (customer_id,))
+            cursor.execute(query, (customer_id,invoice_number))
             result = cursor.fetchone()
             
             
@@ -269,7 +269,7 @@ if main_menu == "Data Management":
                 # Store fetched data in session state
                 st.session_state["result"] = result
             else:
-                st.error("Customer ID not found.")
+                st.error("Customer ID/Invoice Number not found.")
 
         # Step 2: Display Update Form
         if "result" in st.session_state and st.session_state["result"]:
@@ -305,10 +305,26 @@ if main_menu == "Data Management":
         customer_id = st.text_input("Enter Customer ID to Delete")
         invoice_number = st.text_input("Enter Invoice Number to Delete")
         if st.button("Delete Entry"):
-            query = "DELETE FROM customer_data WHERE customer_id = %s and invoice_number = %s"
-            cursor.execute(query, (customer_id,))
-            conn.commit()
-            st.success("Entry deleted successfully!")
+            try:
+                if not customer_id or not invoice_number:
+                    st.error("Both Customer ID and Invoice Number are required.")
+                else:
+                    query_check = "SELECT * FROM customer_data WHERE customer_id = %s AND invoice_number = %s"
+                    cursor.execute(query_check, (customer_id, invoice_number))
+                    result = cursor.fetchone()
+
+                    if result:
+                        query_delete = "DELETE FROM customer_data WHERE customer_id = %s AND invoice_number = %s"
+                        cursor.execute(query_delete, (customer_id, invoice_number))
+                        conn.commit()
+                        st.success("Entry deleted successfully!")
+                    else:
+                        st.error("Customer ID or Invoice Number not found. Deletion failed.")
+
+            except Exception as e:
+                st.error(f"An unexpected error occurred: {e}")
+
+
 
 
 # Additional data visualizations
