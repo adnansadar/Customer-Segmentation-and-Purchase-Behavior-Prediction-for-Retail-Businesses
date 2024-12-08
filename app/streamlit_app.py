@@ -258,18 +258,28 @@ if main_menu == "Data Management":
         # Step 1: Fetch Data
         customer_id = st.text_input("Enter Customer ID to Update")
         invoice_number = st.text_input("Enter Invoice Number to Update")
+        if "fetch_status" not in st.session_state:
+            st.session_state.fetch_status = False
+
         if st.button("Fetch Data"):
-            # Fetch the data for the entered customer ID
-            query = "SELECT * FROM customer_data WHERE customer_id = %s and invoice_number = %s"
-            cursor.execute(query, (customer_id,invoice_number))
-            result = cursor.fetchone()
-            
-            
-            if result:
-                # Store fetched data in session state
-                st.session_state["result"] = result
-            else:
-                st.error("Customer ID/Invoice Number not found.")
+            try:
+                if not customer_id or not invoice_number:
+                    st.error("Both Customer ID and Invoice Number are required.")
+                else:
+                    query = "SELECT * FROM customer_data WHERE customer_id = %s AND invoice_number = %s"
+                    cursor.execute(query, (customer_id, invoice_number))
+                    result = cursor.fetchone()
+
+                    if result:
+                        st.session_state["result"] = result
+                        st.session_state.fetch_status = True
+                        st.success("Data fetched successfully!")
+                    else:
+                        st.session_state.fetch_status = False
+                        st.error("Customer ID/Invoice Number not found.")
+            except Exception as e:
+                st.error(f"An error occurred: {e}")
+
 
         # Step 2: Display Update Form
         if "result" in st.session_state and st.session_state["result"]:
