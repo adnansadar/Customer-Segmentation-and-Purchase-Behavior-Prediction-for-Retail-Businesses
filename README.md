@@ -2,13 +2,41 @@
 
 ## This streamlit web-app is deployed on [this url](https://customer-insight-engine.streamlit.app/)
 
+# Customer Insights and Segmentation Dashboard
+
+The **Customer Insights and Segmentation Dashboard** is an interactive Streamlit app designed to help retail businesses derive actionable insights from customer data. At its core, the app features **RFM Segmentation**, a powerful framework to categorize customers and enhance business intelligence.
+
+## RFM Segmentation Highlights
+
+### What It Does
+Categorizes customers based on three key metrics:
+- **Recency**: How recently a customer made a purchase.
+- **Frequency**: How often a customer makes purchases.
+- **Monetary Value**: How much revenue a customer generates.
+
+### Actionable Insights
+Identifies customer segments like:
+- **Top Customers**: High-value, loyal customers.
+- **New Customers**: Recently acquired customers.
+- **Lost Customers**: Customers who need re-engagement.
+- **Regular Customers**: Steady, consistent buyers.
+- **Loyal Customers**: Highly frequent and valuable customers.
+
+### Business Intelligence
+- **Resource Allocation**: Helps allocate marketing resources effectively.
+- **Re-engagement Strategies**: Guides re-engagement strategies for lost customers.
+- **Upselling and Retention**: Pinpoints high-potential customer segments for upselling and retention.
+- **Strategic Improvements**: Highlights gaps in customer retention to improve business strategy.
+
+
+
 ## Team Number 29
 
 | Name                           | UB Number |
 | ------------------------------ | --------- |
 | Adnan Shahid Sadar             | 50592332  |
-| Rachana Ramesh                 | 50596083  |
 | Mohammed Abdul Aftab Muddassir | 50604245  |
+| Rachana Ramesh                 | 50596083  |
 | Brunda Venkatesh               | 50610164  |
 
 ## Folder Structure
