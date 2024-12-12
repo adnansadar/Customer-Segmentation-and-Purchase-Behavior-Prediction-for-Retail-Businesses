@@ -35,37 +35,29 @@
 │   ├── database.py
 │   ├── requirements.txt
 └── README.md
+└── app_short_video.mp4
+└── project_report.pdf
 ```
 
 ## Questions and Code Locations
 
 ### Adnan Shahid Sadar(50592332)
 
-- **Question 1:** How do age and gender affect customer preferences for different product categories?
-- **Question 2:** Do customers in different locations (shopping malls) show distinct purchasing behaviors?
-- **Code 1 Location:** `src/50592332_phase2.ipynb`
-- **Analysis 1 Location:** `refer to src/50592332_phase2.ipynb or pdf/50592332_phase2.pdf`
-- **Code 2 Location:** `src/50592332_phase2.ipynb`
-- **Analysis 2 Location:** `refer to src/50592332_phase2.ipynb or pdf/50592332_phase2.pdf`
-
-### Rachana Ramesh
-
-- **Question:** How can we predict customer purchase behavior?
-- **Code Location:** `src/rachana_purchase_prediction.ipynb`
-- **Analysis Location:** `src/rachana_purchase_prediction.ipynb`
+- **Question 1:** How do age groups influence the quantity of products purchased and their preferred product categories?
+- **Code 1 Location:** `app/streamlit_app.py line 704`
+- **Analysis 1 Location:** `refer to project_report.pdf`
+- **Question 2:** What customer behaviours (age, gender, price sensitivity, and quantity purchased) predict product category preferences?
+- **Code 2 Location:** `app/streamlit_app.py line 767`
+- **Analysis 2 Location:** `refer to project_report.pdf`
 
 ### Mohammed Abdul Aftab Muddassir
 
-- **Question 1:** Which product categories are generating the highest sales, indicating a need for potential adjustments in stocking strategies?
-- **Question 2:** How do the revenue trends across different quarters in 2021 and 2022 compare, and how can quarterly performance of past years be helpful to plan for the future of business?
-- **Code Location:** `src/50604245_phase2.ipynb`
-- **Analysis Location:** `src/50604245_phase2.ipynb or 50604245_phase2.pdf`
-
-### Brunda Venkatesh
-
-- **Question:** How do external factors affect customer purchasing decisions?
-- **Code Location:** `src/brunda_external_factors.ipynb`
-- **Analysis Location:** `src/brunda_external_factors.ipynb`
+- **Question 1:** Who are the top customers contributing the most revenue?
+- **Code Location:** `app/streamlit_app.py line 420`
+- **Analysis 1 Location:** `refer to project_report.pdf`
+- **Question 2:** How many customers fall into each RFM segment, and what is their behaviour?
+- **Code Location:** `app/streamlit_app.py line 484`
+- **Analysis 2 Location:** `refer to project_report.pdf`
 
 ## Instructions to Build and Run the App
 
