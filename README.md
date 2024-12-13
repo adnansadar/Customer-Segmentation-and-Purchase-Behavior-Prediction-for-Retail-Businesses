@@ -1,8 +1,6 @@
-# Customer-Segmentation-and-Purchase-Behavior-Prediction-for-Retail-Businesses
-
-## This streamlit web-app is deployed on [this url](https://customer-insight-engine.streamlit.app/)
-
 # Customer Insights and Segmentation Dashboard
+
+### This streamlit web-app is deployed on [this url](https://customer-insight-engine.streamlit.app/)
 
 The **Customer Insights and Segmentation Dashboard** is an interactive Streamlit app designed to help retail businesses derive actionable insights from customer data. At its core, the app features **RFM Segmentation**, a powerful framework to categorize customers and enhance business intelligence.
 
