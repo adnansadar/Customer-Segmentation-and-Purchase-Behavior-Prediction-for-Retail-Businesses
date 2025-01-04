@@ -7,13 +7,17 @@ The **Customer Insights and Segmentation Dashboard** is an interactive Streamlit
 ## RFM Segmentation Highlights
 
 ### What It Does
+
 Categorizes customers based on three key metrics:
+
 - **Recency**: How recently a customer made a purchase.
 - **Frequency**: How often a customer makes purchases.
 - **Monetary Value**: How much revenue a customer generates.
 
 ### Actionable Insights
+
 Identifies customer segments like:
+
 - **Top Customers**: High-value, loyal customers.
 - **New Customers**: Recently acquired customers.
 - **Lost Customers**: Customers who need re-engagement.
@@ -21,21 +25,11 @@ Identifies customer segments like:
 - **Loyal Customers**: Highly frequent and valuable customers.
 
 ### Business Intelligence
+
 - **Resource Allocation**: Helps allocate marketing resources effectively.
 - **Re-engagement Strategies**: Guides re-engagement strategies for lost customers.
 - **Upselling and Retention**: Pinpoints high-potential customer segments for upselling and retention.
 - **Strategic Improvements**: Highlights gaps in customer retention to improve business strategy.
-
-
-
-## Team Number 29
-
-| Name                           | UB Number |
-| ------------------------------ | --------- |
-| Adnan Shahid Sadar             | 50592332  |
-| Mohammed Abdul Aftab Muddassir | 50604245  |
-| Rachana Ramesh                 | 50596083  |
-| Brunda Venkatesh               | 50610164  |
 
 ## Folder Structure
 
@@ -56,29 +50,8 @@ Identifies customer segments like:
 │   ├── database.py
 │   ├── requirements.txt
 └── README.md
-└── app_short_video.mp4
 └── project_report.pdf
 ```
-
-## Questions and Code Locations
-
-### Adnan Shahid Sadar(50592332)
-
-- **Question 1:** How do age groups influence the quantity of products purchased and their preferred product categories?
-- **Code 1 Location:** `app/streamlit_app.py line 704`
-- **Analysis 1 Location:** `refer to project_report.pdf`
-- **Question 2:** What customer behaviours (age, gender, price sensitivity, and quantity purchased) predict product category preferences?
-- **Code 2 Location:** `app/streamlit_app.py line 767`
-- **Analysis 2 Location:** `refer to project_report.pdf`
-
-### Mohammed Abdul Aftab Muddassir
-
-- **Question 1:** Who are the top customers contributing the most revenue?
-- **Code Location:** `app/streamlit_app.py line 420`
-- **Analysis 1 Location:** `refer to project_report.pdf`
-- **Question 2:** How many customers fall into each RFM segment, and what is their behaviour?
-- **Code Location:** `app/streamlit_app.py line 484`
-- **Analysis 2 Location:** `refer to project_report.pdf`
 
 ## Instructions to Build and Run the App
 
